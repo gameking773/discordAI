@@ -1,5 +1,5 @@
 import discord
-from providers import AIProvider
+from AIProvider import AIProvider
 
 
 class ChatSession:

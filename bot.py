@@ -1,5 +1,5 @@
 import discord
-from session import ChatSession
+from Session import ChatSession
 
 
 class DiscordAIBot(discord.Client):
@@ -44,7 +44,7 @@ class DiscordAIBot(discord.Client):
 
 
 if __name__ == "__main__":
-  token = input("Entre ton Token Discord : ").strip()
+  token = input("Enter your Discord Token : ").strip()
 
   intents = discord.Intents.default()
   intents.message_content = True
