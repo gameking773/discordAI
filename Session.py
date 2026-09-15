@@ -13,7 +13,6 @@ class ChatSession:
     topic = self.channel.topic or ""
     self.provider = "groq"
     self.model = ""
-    self.apikey = ""
     self.local_base = ""
     self.system_prompt = ""
 
@@ -24,8 +23,6 @@ class ChatSession:
         self.provider = part.replace("provider:", "").strip()
       elif part.startswith("model:"):
         self.model = part.replace("model:", "").strip()
-      elif part.startswith("apikey:"):
-        self.apikey = part.replace("apikey:", "").strip()
       elif part.startswith("localbase:"):
         self.local_base = part.replace("localbase:", "").strip()
       elif part.startswith("system:"):
@@ -42,13 +39,17 @@ class ChatSession:
   def add_message(self, role: str, content: str):
     self.history.append({"role": role, "content": content})
 
-  def get_reply(self, user_message: str) -> str:
+  def get_reply(self, user_message: str, user_config: dict) -> str:
     self.refresh()
 
     self.add_message("user", user_message)
 
+    provider = user_config.get("provider") or self.provider
+    model = user_config.get("model") or self.model
+    apikey = user_config.get("apikey", "")
+
     reply = AIProvider.generate(
-        self.provider, self.model, self.apikey, self.local_base, self.history
+        provider, model, apikey, self.local_base, self.history
     )
 
     self.add_message("assistant", reply)

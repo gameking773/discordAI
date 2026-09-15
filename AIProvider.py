@@ -4,7 +4,7 @@ class AIProvider:
     def generate(provider: str, model: str, apikey: str, local_base: str, history: list) -> str:
         provider = provider.lower().strip()
 
-        if not apikey:
+        if not apikey and provider != "local":
             return "Api Key missing : add 'apikey:your_key' to the subject of the channel"
 
         return (
