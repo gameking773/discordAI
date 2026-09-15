@@ -39,6 +39,18 @@ class ChatSession:
   def add_message(self, role: str, content: str):
     self.history.append({"role": role, "content": content})
 
+    system_messages = [m for m in self.history if m["role"] == "system"]
+    chat_messages = [m for m in self.history if m["role"] != "system"]
+
+    max_messages = 20
+    if len(chat_messages) > max_messages:
+      chat_messages = chat_messages[-max_messages:]
+
+    self.history = system_messages + chat_messages
+
+  def clear(self):
+    self.reset_history()
+
   def get_reply(self, user_message: str, user_config: dict) -> str:
     self.refresh()
 

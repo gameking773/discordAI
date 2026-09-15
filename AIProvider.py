@@ -76,6 +76,6 @@ class AIProvider:
         handler = handlers.get(provider)
 
         if not handler:
-            return f"⚠️ Provider non reconnu : `{provider}`"
+            return f"Provider not recognized : `{provider}`"
 
         return handler(apikey, model, history, local_base)

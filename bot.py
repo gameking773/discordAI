@@ -78,10 +78,12 @@ class DiscordAIBot(discord.Client):
       async with message.channel.typing():
         reply = session.get_reply(prompt, user_config)
 
-      if len(reply) > 2000:
-        reply = reply[:1997] + "..."
-
-      await message.reply(reply)
+      if len(reply) <= 2000:
+        await message.reply(reply)
+      else:
+        chunks = [reply[i : i + 1900] for i in range(0, len(reply), 1900)]
+        for chunk in chunks:
+          await message.channel.send(chunk)
 
   async def on_guild_channel_update(self, before, after):
     if isinstance(after, discord.TextChannel) and after.id in self.sessions:
@@ -101,6 +103,34 @@ bot = DiscordAIBot(intents=intents)
 async def config_command(interaction: discord.Interaction):
   await interaction.response.send_modal(ConfigModal(bot))
 
+@bot.tree.command(
+    name="clear", 
+    description="Clear channel history from bot memory"
+)
+async def clear_command(interaction: discord.Interaction):
+  if not isinstance(interaction.channel, discord.TextChannel):
+    return
+
+  session = bot.get_session(interaction.channel)
+  session.clear()
+  await interaction.response.send_message(
+      "Channel's history cleared", ephemeral=False
+  )
+
+@bot.tree.command(
+    name="forget", description="Delete API Key from RAM"
+)
+async def forget_command(interaction: discord.Interaction):
+  if interaction.user.id in bot.user_configs:
+    del bot.user_configs[interaction.user.id]
+    await interaction.response.send_message(
+        "configuration and API Key cleared",
+        ephemeral=True,
+    )
+  else:
+    await interaction.response.send_message(
+        "No key registered", ephemeral=True
+    )
 
 if __name__ == "__main__":
   token = input("Enter your Discord Token : ").strip()
