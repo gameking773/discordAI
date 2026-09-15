@@ -1,4 +1,5 @@
 import discord
+import os
 from discord import app_commands, ui
 from Session import ChatSession
 
@@ -171,5 +172,5 @@ async def forget_command(interaction: discord.Interaction):
     )
 
 if __name__ == "__main__":
-  token = input("Enter your Discord Token : ").strip()
+  token = os.getenv("DISCORD_TOKEN") or input("Enter your Discord Token : ").strip()
   bot.run(token)
