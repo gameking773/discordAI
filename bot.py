@@ -57,6 +57,47 @@ class DiscordAIBot(discord.Client):
       self.sessions[channel.id] = ChatSession(channel)
     return self.sessions[channel.id]
 
+  @staticmethod
+  def split_message(text: str, limit: int = 1900) -> list[str]:
+    if len(text) <= limit:
+      return [text]
+
+    chunks = []
+    current_chunk = []
+    current_length = 0
+    in_code_block = False
+    code_language = ""
+
+    for line in text.split("\n"):
+      if line.strip().startswith("```"):
+        if not in_code_block:
+          in_code_block = True
+          code_language = line.strip()[3:]
+        else:
+          in_code_block = False
+          code_language = ""
+
+      if current_length + len(line) + 1 > limit:
+        if in_code_block:
+          current_chunk.append("```")
+
+        chunks.append("\n".join(current_chunk))
+        current_chunk = []
+        current_length = 0
+
+        if in_code_block:
+          opening = f"```{code_language}"
+          current_chunk.append(opening)
+          current_length += len(opening) + 1
+
+      current_chunk.append(line)
+      current_length += len(line) + 1
+
+    if current_chunk:
+      chunks.append("\n".join(current_chunk))
+
+    return chunks
+
   async def on_message(self, message):
     if message.author == self.user or not isinstance(message.channel, discord.TextChannel):
       return
@@ -78,12 +119,9 @@ class DiscordAIBot(discord.Client):
       async with message.channel.typing():
         reply = session.get_reply(prompt, user_config)
 
-      if len(reply) <= 2000:
-        await message.reply(reply)
-      else:
-        chunks = [reply[i : i + 1900] for i in range(0, len(reply), 1900)]
-        for chunk in chunks:
-          await message.channel.send(chunk)
+      chunks = self.split_message(reply)
+      for chunk in chunks:
+        await message.channel.send(chunk)
 
   async def on_guild_channel_update(self, before, after):
     if isinstance(after, discord.TextChannel) and after.id in self.sessions:
