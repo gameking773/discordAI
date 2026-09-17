@@ -109,6 +109,34 @@ class AdvancedConfigModal(ui.Modal, title="Advanced configuration (Manual)"):
 
     await interaction.response.send_message(resp, ephemeral=True)
 
+class ConfigView(ui.View):
+  def __init__(self, bot_instance):
+    super().__init__(timeout=120)
+    self.bot = bot_instance
+
+  @ui.select(
+      placeholder="1. Choose your provider...",
+      options=[
+          discord.SelectOption(label="Groq", value="groq", description="Ultra-fast & Free"),
+          discord.SelectOption(label="OpenRouter", value="openrouter", description="Free models access"),
+          discord.SelectOption(label="Hugging Face Serverless", value="huggingface"),
+          discord.SelectOption(label="Google Gemini", value="gemini"),
+          discord.SelectOption(label="OpenAI", value="openai"),
+      ],
+      row=0,
+  )
+  async def select_provider(self, interaction: discord.Interaction, select: ui.Select):
+    provider = select.values[0]
+    await interaction.response.send_modal(ApiKeyModal(self.bot, provider))
+
+  @ui.button(
+      label="Advanced Mode (Manual Input)",
+      style=discord.ButtonStyle.secondary,
+      emoji="🛠️",
+      row=1,
+  )
+  async def advanced_mode(self, interaction: discord.Interaction, button: ui.Button):
+    await interaction.response.send_modal(AdvancedConfigModal(self.bot))
 
 class DiscordAIBot(discord.Client):
 
