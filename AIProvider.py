@@ -58,7 +58,7 @@ class AIProvider:
       apikey: str, model: str, history: list, local_base: str
   ) -> str:
     client = OpenAI(
-        base_url="https://api-inference.huggingface.co/v1/",
+        base_url="https://router.huggingface.co/hf-inference/v1",
         api_key=apikey,
     )
     response = client.chat.completions.create(
@@ -108,7 +108,7 @@ class AIProvider:
     provider = provider.lower().strip()
 
     if not apikey and provider != "local":
-      return "Missing API Key. use `/config`."
+      return "Missing API Key. use `/config`."[cite: 4]
 
     handlers = {
         "openai": cls._handle_openai,
@@ -125,6 +125,9 @@ class AIProvider:
     handler = handlers.get(provider)
 
     if not handler:
-      return f"Unknown Provider : `{provider}`"
+      return f"Unknown Provider : `{provider}`"[cite: 4]
 
-    return handler(apikey, model, history, local_base)
+    try:
+      return handler(apikey, model, history, local_base)
+    except Exception as e:
+      return f"API Error ({provider}) : `{str(e)}`"
