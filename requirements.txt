@@ -3,3 +3,4 @@ groq
 google-genai
 anthropic
 openai
+aiohttp

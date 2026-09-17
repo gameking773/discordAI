@@ -53,15 +53,15 @@ class ChatSession:
 
   def get_reply(self, user_message: str, user_config: dict) -> str:
     self.refresh()
-
     self.add_message("user", user_message)
 
     provider = user_config.get("provider") or self.provider
     model = user_config.get("model") or self.model
     apikey = user_config.get("apikey", "")
+    local_base = user_config.get("local_base") or self.local_base
 
     reply = AIProvider.generate(
-        provider, model, apikey, self.local_base, self.history
+        provider, model, apikey, local_base, self.history
     )
 
     self.add_message("assistant", reply)
